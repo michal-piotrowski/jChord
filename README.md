@@ -12,6 +12,11 @@ mvn clean package
 ```
 
 run using
+- the interactive mode 
 ```bash
  java -jar .\target\jChord.jar addNew
 ```
+- or one-command mode
+```bash
+  java -jar .\target\jChord.jar addNew E7#5 0.7.9.9.9.8
+``` 
