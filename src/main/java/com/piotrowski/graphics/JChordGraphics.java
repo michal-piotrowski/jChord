@@ -15,7 +15,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 
-public class GraphicsScheisse extends JFrame {
+public class JChordGraphics extends JFrame {
 
     static BufferedImage bi;
     private final int VISUAL_STRING_FRET_OFFSET = 20;
@@ -26,13 +26,14 @@ public class GraphicsScheisse extends JFrame {
     private final double STRING_GAUGE_RATIO = 1.45;
     private final int LEFT_SIDE_OFFSET = 100;
     private final int FRET_ANNOTATION_OFFSET = 50;
+    private int lowestFretInTab = 24;
+    private int highestFretInTab = 0;
     private final ArrayList<Integer> fretXPositions = new ArrayList<>();
     // added in order of EADGBE
     private final ArrayList<Integer> stringYPositions = new ArrayList<>();
-    private int lowestFretInTab = 24;
-    private int highestFretInTab = 0;
     // added in order of EADGBE
     private final ArrayList<Pair<MARK, XYPos>> fingersPositionsOnTemplate = new ArrayList<>();
+    private String absolutePathToResultFile;
 
     private enum MARK {
         CIRCLE,
@@ -65,10 +66,13 @@ public class GraphicsScheisse extends JFrame {
         }
     }
 
-    public GraphicsScheisse(String chordName, List<Pair<String, String>> tabs) throws IOException {
+    public JChordGraphics(String chordName, List<Pair<String, String>> tabs) throws IOException {
         initUI();
         BufferedImage chordImage = prepareChord(tabs);
-        ImageIO.write(chordImage, "JPEG", new File(chordName.replace("/", "_over_") + ".jpg"));
+        String chordImagePath = chordName.replace("/", "_over_") + ".jpg";
+        File chordImageFile = new File(chordImagePath);
+        ImageIO.write(chordImage, "JPEG", chordImageFile);
+        this.absolutePathToResultFile = chordImageFile.getAbsolutePath();
     }
 
     private BufferedImage prepareChord(List<Pair<String, String>> tabs) {
@@ -82,8 +86,8 @@ public class GraphicsScheisse extends JFrame {
 
         for (Pair<String, String> tab : tabs) {
             if (!tab.getRight().equalsIgnoreCase("x") && !tab.getRight().equalsIgnoreCase("0")) {
-                lowestFretInTab = Integer.parseInt(tab.getRight()) < lowestFretInTab ? Integer.parseInt(tab.getRight()) : lowestFretInTab;
-                highestFretInTab = Integer.parseInt(tab.getRight()) > highestFretInTab ? Integer.parseInt(tab.getRight()) : highestFretInTab;
+                lowestFretInTab = Math.min(Integer.parseInt(tab.getRight()), lowestFretInTab);
+                highestFretInTab = Math.max(Integer.parseInt(tab.getRight()), highestFretInTab);
                 FRET_COUNT = highestFretInTab - lowestFretInTab + 2;
             }
         }
@@ -97,8 +101,12 @@ public class GraphicsScheisse extends JFrame {
         BufferedImage im = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = getGraphics2D(FRET_LENGTH, STRING_LENGTH, im);
 
+        g2d.setPaint(new Color(255, 255, 255));
+        g2d.fillRect(0, 0, Math.round(STRING_LENGTH) + 40, (int) Math.round(FRET_LENGTH) + 90);
+        g2d.setPaint(new Color(160, 160, 160));
         drawFrets(FRET_SEPARATION, VISUAL_STRING_FRET_OFFSET, FRET_WIDTH, FRET_COUNT, FRET_LENGTH, g2d);
         drawStrings(STRING_SEPARATION, VISUAL_STRING_FRET_OFFSET, HIGH_E_STRING_WIDTH, STRING_GAUGE_RATIO, STRING_LENGTH, g2d);
+        g2d.setPaint(new Color(0, 0, 0));
         annotateStrings(STRING_SEPARATION, g2d);
         layTabsAndFretsNs(tabs, g2d);
         g2d.dispose();
@@ -214,13 +222,21 @@ public class GraphicsScheisse extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
+    public String getAbsolutePathToResultFile() {
+        return absolutePathToResultFile;
+    }
+
+    public void setAbsolutePathToResultFile(String absolutePathToResultFile) {
+        this.absolutePathToResultFile = absolutePathToResultFile;
+    }
+
     /**
      * This main method is created only for testing during development
      */
     public static void main(String[] args) {
 
         EventQueue.invokeLater(() -> {
-            GraphicsScheisse gs = null;
+            JChordGraphics gs = null;
             try {
                 List<Pair<String, String>> testList = new ArrayList<>(
                         Arrays.asList(
@@ -232,7 +248,7 @@ public class GraphicsScheisse extends JFrame {
                                 new Pair<>("E", "7")
                         )
                 );
-                gs = new GraphicsScheisse("EmM6", testList);
+                gs = new JChordGraphics("EmM6", testList);
             } catch (IOException e) {
                 e.printStackTrace();
             }

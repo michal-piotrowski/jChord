@@ -1,6 +1,6 @@
 package com.piotrowski.userInputLogic;
 
-import com.piotrowski.graphics.GraphicsScheisse;
+import com.piotrowski.graphics.JChordGraphics;
 import com.piotrowski.util.Pair;
 
 import java.io.*;
@@ -198,8 +198,8 @@ public class CommandsImpl implements Commands {
         stringFretPairs.add(new Pair<>("G", frets[3]));
         stringFretPairs.add(new Pair<>("B", frets[4]));
         stringFretPairs.add(new Pair<>("E", frets[5]));
-        new GraphicsScheisse(chordName, stringFretPairs);
-        System.out.println("Chord successfully created");
+        JChordGraphics jchordInfo = new JChordGraphics(chordName, stringFretPairs);
+        System.out.println("Chord image successfully created under " + jchordInfo.getAbsolutePathToResultFile());
         return STATE.CONTINUE;
     }
 
