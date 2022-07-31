@@ -1,7 +1,7 @@
 package com.piotrowski.graphics;
 
 
-import javafx.util.Pair;
+import com.piotrowski.util.Pair;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -19,23 +19,20 @@ public class GraphicsScheisse extends JFrame {
 
     static BufferedImage bi;
     private final int VISUAL_STRING_FRET_OFFSET = 20;
-    private final int FRET_WIDTH = 3;
     private final int FRET_SEPARATION = 100;
     private final int STRING_SEPARATION = 50;
 
-
     private int FRET_COUNT = 4;
-    private final int HIGH_E_STRING_WIDTH = 1;
     private final double STRING_GAUGE_RATIO = 1.45;
     private final int LEFT_SIDE_OFFSET = 100;
     private final int FRET_ANNOTATION_OFFSET = 50;
-    private ArrayList<Integer> fretXPositions = new ArrayList<>();
+    private final ArrayList<Integer> fretXPositions = new ArrayList<>();
     // added in order of EADGBE
-    private ArrayList<Integer> stringYPositions = new ArrayList<>();
+    private final ArrayList<Integer> stringYPositions = new ArrayList<>();
     private int lowestFretInTab = 24;
     private int highestFretInTab = 0;
     // added in order of EADGBE
-    private ArrayList<Pair<MARK, XYPos>> fingersPositionsOnTemplate = new ArrayList<>();
+    private final ArrayList<Pair<MARK, XYPos>> fingersPositionsOnTemplate = new ArrayList<>();
 
     private enum MARK {
         CIRCLE,
@@ -60,7 +57,6 @@ public class GraphicsScheisse extends JFrame {
         }
 
         public int getX() {
-
             return x;
         }
 
@@ -77,17 +73,23 @@ public class GraphicsScheisse extends JFrame {
 
     private BufferedImage prepareChord(List<Pair<String, String>> tabs) {
 
-        Double FRET_LENGTH = DoubleStream.iterate(HIGH_E_STRING_WIDTH, n -> n * STRING_GAUGE_RATIO).limit(5).reduce((a, b) -> a + b).orElse((double) 0) + 5 * STRING_SEPARATION - 2;
+        int HIGH_E_STRING_WIDTH = 1;
+        Double FRET_LENGTH = DoubleStream
+                .iterate(HIGH_E_STRING_WIDTH, n -> n * STRING_GAUGE_RATIO)
+                .limit(5)
+                .reduce(Double::sum)
+                .orElse(0) + 5 * STRING_SEPARATION - 2;
 
         for (Pair<String, String> tab : tabs) {
-            if (!tab.getValue().equalsIgnoreCase("x") && !tab.getValue().equalsIgnoreCase("0")) {
-                lowestFretInTab = Integer.parseInt(tab.getValue()) < lowestFretInTab ? Integer.parseInt(tab.getValue()) : lowestFretInTab;
-                highestFretInTab = Integer.parseInt(tab.getValue()) > highestFretInTab ? Integer.parseInt(tab.getValue()) : highestFretInTab;
+            if (!tab.getRight().equalsIgnoreCase("x") && !tab.getRight().equalsIgnoreCase("0")) {
+                lowestFretInTab = Integer.parseInt(tab.getRight()) < lowestFretInTab ? Integer.parseInt(tab.getRight()) : lowestFretInTab;
+                highestFretInTab = Integer.parseInt(tab.getRight()) > highestFretInTab ? Integer.parseInt(tab.getRight()) : highestFretInTab;
                 FRET_COUNT = highestFretInTab - lowestFretInTab + 2;
             }
         }
 
         final int STRING_RESIDUAL = FRET_SEPARATION;
+        int FRET_WIDTH = 3;
         final int STRING_LENGTH = (FRET_COUNT - 1) * (FRET_WIDTH + FRET_SEPARATION) + STRING_RESIDUAL;
 
         setSize(VISUAL_STRING_FRET_OFFSET * 2 + STRING_LENGTH,
@@ -111,14 +113,14 @@ public class GraphicsScheisse extends JFrame {
 
     private void preparePositions(List<Pair<String, String>> tabs) {
         for (int i = 0; i < tabs.size(); ++i) {
-            if (tabs.get(i).getValue().equals("0")) {
+            if (tabs.get(i).getRight().equals("0")) {
 
                 fingersPositionsOnTemplate.add(new Pair<>(MARK.ZERO, new XYPos(2 * VISUAL_STRING_FRET_OFFSET, VISUAL_STRING_FRET_OFFSET / 2 + stringYPositions.get(5 - i))));
-            } else if (tabs.get(i).getValue().equalsIgnoreCase("x")) {
+            } else if (tabs.get(i).getRight().equalsIgnoreCase("x")) {
                 fingersPositionsOnTemplate.add(new Pair<>(MARK.X, new XYPos(2 * VISUAL_STRING_FRET_OFFSET, VISUAL_STRING_FRET_OFFSET / 2 + stringYPositions.get(5 - i))));
             } else {
                 fingersPositionsOnTemplate.add(new Pair<>(MARK.CIRCLE, new XYPos(
-                        VISUAL_STRING_FRET_OFFSET + LEFT_SIDE_OFFSET + (int) (STRING_SEPARATION / 1.4) + (Integer.parseInt(tabs.get(i).getValue()) - (lowestFretInTab)) * FRET_SEPARATION,
+                        VISUAL_STRING_FRET_OFFSET + LEFT_SIDE_OFFSET + (int) (STRING_SEPARATION / 1.4) + (Integer.parseInt(tabs.get(i).getRight()) - (lowestFretInTab)) * FRET_SEPARATION,
                         stringYPositions.get(5 - i) - STRING_SEPARATION / 4)));
             }
         }
@@ -131,7 +133,7 @@ public class GraphicsScheisse extends JFrame {
 
     private void layTabs(List<Pair<String, String>> tabs, Graphics2D g2d) {
         for (Pair<MARK, XYPos> tab : fingersPositionsOnTemplate) {
-            layTab(tab.getKey(), tab.getValue().x, tab.getValue().y, g2d);
+            layTab(tab.getLeft(), tab.getRight().x, tab.getRight().y, g2d);
         }
     }
 

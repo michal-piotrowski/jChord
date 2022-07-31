@@ -1,11 +1,8 @@
 package com.piotrowski.userInputLogic;
 
 import com.piotrowski.graphics.GraphicsScheisse;
-import javafx.util.Pair;
-import jdk.internal.util.xml.impl.Input;
+import com.piotrowski.util.Pair;
 
-import javax.swing.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
